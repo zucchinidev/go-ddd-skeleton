@@ -10,9 +10,9 @@ services:
     command: "policy-api"
     container_name: policy-api
     networks:
-      gata:
+      golang:
         aliases:
           - policy-api
 networks:
-  gata:
+  golang:
     external: true
