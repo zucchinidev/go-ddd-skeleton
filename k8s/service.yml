@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: policy-api
+  labels:
+    app: policy-api
+    ns: production
+  namespace: production
+spec:
+  ports:
+    - port: 3009
+      protocol: TCP
+      targetPort: 3009
+  selector:
+    app: policy-api
+    ns: production
+  type: ClusterIP
+

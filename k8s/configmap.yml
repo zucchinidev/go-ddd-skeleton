@@ -1,0 +1,7 @@
+apiVersion: v1
+data:
+  GO_DDD_SKELETON_HTTP_SERVER_LISTEN_ADDRESS: 0.0.0.0:3009
+kind: ConfigMap
+metadata:
+  name: policy-api
+  namespace: production

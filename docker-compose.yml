@@ -1,0 +1,18 @@
+version: '2.2'
+services:
+  policy-api:
+    restart: always
+    build: .
+    ports:
+      - "3009:3009"
+    env_file:
+      - env/development.env
+    command: "policy-api"
+    container_name: policy-api
+    networks:
+      gata:
+        aliases:
+          - policy-api
+networks:
+  gata:
+    external: true

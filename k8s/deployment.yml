@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: policy-api
+    ns: production
+  name: policy-api
+  namespace: production
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: policy-api
+      ns: production
+  template:
+    metadata:
+      labels:
+        app: policy-api
+        ns: production
+      namespace: production
+    spec:
+      containers:
+        - command:
+            - policy-api
+          env:
+            - name: GO_DDD_SKELETON_SQL_DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: infrastructure
+                  key: SQL_DB_HOST
+            - name: GO_DDD_SKELETON_SQL_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: infrastructure
+                  key: SQL_DB_NAME
+            - name: GO_DDD_SKELETON_SQL_DB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: infrastructure
+                  key: SQL_DB_USER
+            - name: GO_DDD_SKELETON_SQL_DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: infrastructure
+                  key: SQL_DB_PASS
+          envFrom:
+            - configMapRef:
+                name: policy-api
+          image: registry.zucchinidev.com/policy-api:v1.0.0-rc
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /status
+              port: 3009
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: policy-api
+          ports:
+            - containerPort: 3009
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /status
+              port: 3009
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+        - name: zucchinidev-registry
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
