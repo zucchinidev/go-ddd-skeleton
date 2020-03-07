@@ -56,7 +56,6 @@ func IsFetchingPoliciesUseCaseError(err error) bool {
 	return ok
 }
 
-
 type userSearch struct {
 	error
 }
@@ -75,7 +74,6 @@ func IsUserSearchError(err error) bool {
 	return ok
 }
 
-
 type userNotFound struct {
 	error
 }
@@ -91,5 +89,41 @@ func NewUserNotFound(format string, args ...interface{}) error {
 func IsUserNotFoundError(err error) bool {
 	err = errors.Cause(err)
 	_, ok := err.(*userNotFound)
+	return ok
+}
+
+type updatePolicy struct {
+	error
+}
+
+func WrapUpdatePolicy(err error, format string, args ...interface{}) error {
+	return &updatePolicy{errors.Wrapf(err, format, args...)}
+}
+
+func NewUpdatePolicy(format string, args ...interface{}) error {
+	return &updatePolicy{errors.Errorf(format, args...)}
+}
+
+func IsUpdatePolicyError(err error) bool {
+	err = errors.Cause(err)
+	_, ok := err.(*updatePolicy)
+	return ok
+}
+
+type blockUser struct {
+	error
+}
+
+func WrapBlockUser(err error, format string, args ...interface{}) error {
+	return &blockUser{errors.Wrapf(err, format, args...)}
+}
+
+func NewBlockUser(format string, args ...interface{}) error {
+	return &blockUser{errors.Errorf(format, args...)}
+}
+
+func IsBlockUserError(err error) bool {
+	err = errors.Cause(err)
+	_, ok := err.(*blockUser)
 	return ok
 }

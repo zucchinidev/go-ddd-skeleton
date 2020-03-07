@@ -48,6 +48,49 @@ func (c *policyRepository) OpenPolicies() ([]policy.Policy, error) {
 	return pp, nil
 }
 
+func (c *policyRepository) CloseByUserID(tx policy.TransactionManager, userID int) error {
+	_, err := tx.Exec(c.closePoliciesByUserIDSQL(), policy.ClosedPolicy, userID)
+	return err
+}
+
+func (c *policyRepository) BlockUser(tx policy.TransactionManager, userID int) error {
+	_, err := tx.Exec(c.blockUserSQL(), user.Inactive.IntValue(), userID)
+	return err
+}
+
+// WithTransaction creates a new transaction and handles rollback/commit based on the
+// error object returned by the `TxFn`
+func (c *policyRepository) WithTransaction(fn policy.TxFn) (err error) {
+	tx, err := c.conn.DB.Begin()
+	if err != nil {
+		return
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			// a panic occurred, rollback and re-panic
+			_ = tx.Rollback()
+			panic(p)
+		} else if err != nil {
+			// something went wrong, rollback
+			_ = tx.Rollback()
+		} else {
+			// all good, commit
+			err = tx.Commit()
+		}
+	}()
+
+	err = fn(tx)
+	return err
+}
+
 func (c *policyRepository) getOpenPoliciesSQL() string {
 	return `SELECT p.id, u.id, u.email FROM policy p inner join user u on p.user_id = u.id where p.status_id = ?`
+}
+
+func (c *policyRepository) closePoliciesByUserIDSQL() string {
+	return `UPDATE policy p SET status_id = ? where p.user_id = ?`
+}
+func (c *policyRepository) blockUserSQL() string {
+	return `UPDATE user u SET active = ? where u.id = ?`
 }

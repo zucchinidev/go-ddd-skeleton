@@ -19,6 +19,7 @@ func Server(c Conf, pings []ping.Pinger, policiesRepository policy.PolicyReposit
 	router := httprouter.New()
 	router.GET("/status", statusHandler.Status(pings, c.Version))
 	router.GET("/policies", httpHandlers.FetchPolicies(policiesRepository))
+	router.PUT("/policies/status/close/user/:user_id/blocked", httpHandlers.ClosePolicyWhenUserIsBlocked(policiesRepository)) // what is the fucking correct url?
 	router.GET("/user/:user_id", httpHandlers.FetchUserByID(userRepository))
 	return &http.Server{Addr: c.Addr, Handler: router}
 }
